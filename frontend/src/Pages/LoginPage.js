@@ -1,7 +1,11 @@
-import React, { useState } from "react";
+import React, { useState, useContext } from "react";
+import DispatchContext from "../DispatchContext";
 import "../Styles/Login.css";
+import axios from "axios";
 
 const LoginPage = () => {
+  const appDispatch = useContext(DispatchContext);
+
   const [isSignInPage, setIsSignInPage] = useState(true);
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
@@ -11,8 +15,41 @@ const LoginPage = () => {
     e.preventDefault();
     if (isSignInPage) {
       setIsSignInPage(false);
+      setEmail("");
     } else {
       setIsSignInPage(true);
+      setPassword("");
+    }
+  };
+
+  const handleSignIn = async (e) => {
+    e.preventDefault();
+    try {
+      const response = await axios.post("/api/users/login", {
+        email,
+        password,
+      });
+      if (response.data) {
+        appDispatch({ type: "login", data: response.data });
+      } else {
+        console.log("Incorrect username / password");
+      }
+    } catch (error) {
+      throw new Error(error);
+    }
+  };
+
+  const handleSignUp = async (e) => {
+    e.preventDefault();
+    try {
+      const response = await axios.post("/api/users", {
+        name,
+        email,
+        password,
+      });
+      appDispatch({ type: "login", data: response.data });
+    } catch (error) {
+      throw new Error(error);
     }
   };
 
@@ -23,43 +60,44 @@ const LoginPage = () => {
         id="container"
       >
         <div className="form-container sign-up-container">
-          <form action="#">
+          <form onSubmit={handleSignUp}>
             <h1>Create Account</h1>
-            <div className="social-container">
-              <a href="#" className="social">
-                <i className="fab fa-facebook-f"></i>
-              </a>
-              <a href="#" className="social">
-                <i className="fab fa-google-plus-g"></i>
-              </a>
-              <a href="#" className="social">
-                <i className="fab fa-linkedin-in"></i>
-              </a>
-            </div>
-            <span>or use your email for registration</span>
-            <input type="text" placeholder="Name" />
-            <input type="email" placeholder="Email" />
-            <input type="password" placeholder="Password" />
+            <input
+              name="name"
+              type="text"
+              placeholder="Name"
+              onChange={(e) => setName(e.target.value)}
+            />
+            <input
+              name="email"
+              type="email"
+              placeholder="Email"
+              onChange={(e) => setEmail(e.target.value)}
+            />
+            <input
+              name="password"
+              type="password"
+              placeholder="Password"
+              onChange={(e) => setPassword(e.target.value)}
+            />
             <button>Sign Up</button>
           </form>
         </div>
         <div className="form-container sign-in-container">
-          <form action="#">
+          <form onSubmit={handleSignIn}>
             <h1>Sign in</h1>
-            <div className="social-container">
-              <a href="#" className="social">
-                <i className="fab fa-facebook-f"></i>
-              </a>
-              <a href="#" className="social">
-                <i className="fab fa-google-plus-g"></i>
-              </a>
-              <a href="#" className="social">
-                <i className="fab fa-linkedin-in"></i>
-              </a>
-            </div>
-            <span>or use your account</span>
-            <input type="email" placeholder="Email" />
-            <input type="password" placeholder="Password" />
+            <input
+              name="email"
+              type="email"
+              placeholder="Email"
+              onChange={(e) => setEmail(e.target.value)}
+            />
+            <input
+              name="password"
+              type="password"
+              placeholder="Password"
+              onChange={(e) => setPassword(e.target.value)}
+            />
             <a href="#">Forgot your password?</a>
             <button>Sign In</button>
           </form>

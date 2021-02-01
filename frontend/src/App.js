@@ -7,6 +7,7 @@ import StateContext from "./StateContext";
 import DispatchContext from "./DispatchContext";
 
 import LoginPage from "./Pages/LoginPage";
+import HomePage from "./Pages/HomePage";
 
 const App = () => {
   const initialState = {
@@ -48,7 +49,7 @@ const App = () => {
         <BrowserRouter>
           <Switch>
             <Route path="/" exact>
-              <LoginPage />
+              {state.loggedIn ? <HomePage /> : <LoginPage />}
             </Route>
           </Switch>
         </BrowserRouter>
