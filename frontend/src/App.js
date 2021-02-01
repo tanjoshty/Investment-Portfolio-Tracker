@@ -1,25 +1,60 @@
-import logo from './logo.svg';
-import './App.css';
+import React, { useEffect } from "react";
+import ReactDOM from "react-dom";
+import { BrowserRouter, Switch, Route } from "react-router-dom";
+import { useImmerReducer } from "use-immer";
 
-function App() {
+import StateContext from "./StateContext";
+import DispatchContext from "./DispatchContext";
+
+import LoginPage from "./Pages/LoginPage";
+
+const App = () => {
+  const initialState = {
+    loggedIn: Boolean(localStorage.getItem("portfolioToken")),
+    flashMessages: [],
+    user: {
+      token: localStorage.getItem("portfolioToken"),
+      name: localStorage.getItem("portfolioName"),
+    },
+  };
+
+  function appReducer(draft, action) {
+    switch (action.type) {
+      case "login":
+        draft.loggedIn = true;
+        draft.user = action.data;
+        return;
+      case "logout":
+        draft.loggedIn = false;
+        return;
+    }
+  }
+
+  const [state, dispatch] = useImmerReducer(appReducer, initialState);
+
+  useEffect(() => {
+    if (state.loggedIn) {
+      localStorage.setItem("portfolioToken", state.user.token);
+      localStorage.setItem("portfolioName", state.user.name);
+    } else {
+      localStorage.removeItem("portfolioToken");
+      localStorage.removeItem("portfolioName");
+    }
+  }, [state.loggedIn]);
+
   return (
-    <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.js</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
-    </div>
+    <StateContext.Provider value={state}>
+      <DispatchContext.Provider value={dispatch}>
+        <BrowserRouter>
+          <Switch>
+            <Route path="/" exact>
+              <LoginPage />
+            </Route>
+          </Switch>
+        </BrowserRouter>
+      </DispatchContext.Provider>
+    </StateContext.Provider>
   );
-}
+};
 
 export default App;
